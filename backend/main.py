@@ -9,10 +9,10 @@ from app.api.routes import router
 
 app = FastAPI(title="Quant Platform API", version="1.0.0")
 
-# Setup CORS for the frontend
+# Setup CORS for the frontend (allows local dev and deployed frontend such as Vercel)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For development
+    allow_origin_regex=r"^https?:\/\/.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,10 +20,15 @@ app.add_middleware(
 
 app.include_router(router, prefix="/api")
 
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Quant Platform API is online", "docs": "/docs"}
+
 @app.get("/api/health")
 def health_check():
     return {"status": "ok", "message": "Quant Platform API is running"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
