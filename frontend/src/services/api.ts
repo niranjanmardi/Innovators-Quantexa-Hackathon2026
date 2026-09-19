@@ -113,3 +113,34 @@ export const getCorrelation = async (
     failed_symbols: string[];
   };
 };
+
+export interface UpdateProfilePayload {
+  current_username: string;
+  new_username?: string;
+  new_avatar_url?: string;
+}
+
+export interface UpdateProfileResponse {
+  access_token: string;
+  token_type: string;
+  user: {
+    username: string;
+    email: string;
+    avatar_url: string;
+  };
+}
+
+export const updateProfileApi = async (payload: UpdateProfilePayload): Promise<UpdateProfileResponse> => {
+  try {
+    const { data } = await apiClient.put<UpdateProfileResponse>('/auth/profile', payload);
+    return data;
+  } catch (err: any) {
+    // If relative proxy path fails, fallback to direct port 8000
+    if (!err.response && typeof window !== 'undefined') {
+      const { data } = await axios.put<UpdateProfileResponse>('http://localhost:8000/api/auth/profile', payload);
+      return data;
+    }
+    throw err;
+  }
+};
+

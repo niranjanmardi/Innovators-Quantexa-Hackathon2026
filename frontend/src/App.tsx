@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LineChart, BarChart2, Newspaper, Shield, Database, GitBranch, Terminal } from 'lucide-react';
@@ -8,10 +8,12 @@ import MarketNews from './pages/MarketNews';
 import StrategyLab from './pages/StrategyLab';
 import CorrelationLab from './pages/CorrelationLab';
 import DataSources from './pages/DataSources';
+import ProfilePage from './pages/ProfilePage';
 
 import Auth from './pages/Auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { LogOut } from 'lucide-react';
+import UserProfileMenu from './components/UserProfileMenu';
+import ProfileModal from './components/ProfileModal';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +43,8 @@ function TopNavLink({ to, icon: Icon, children }: { to: string, icon: any, child
 }
 
 function MainLayout() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   if (!isAuthenticated) {
     return <Auth />;
@@ -86,22 +89,9 @@ function MainLayout() {
             </span>
           </div>
 
-          {/* User Profile */}
-          <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-            <div className="flex items-center gap-2">
-              <img src={user?.avatar_url} alt="User Avatar" className="w-8 h-8 rounded-full border border-slate-200 shadow-sm" />
-              <div className="hidden sm:block">
-                <p className="text-xs font-bold text-slate-800 leading-tight">{user?.username}</p>
-                <p className="text-[10px] text-slate-500 font-medium">{user?.email}</p>
-              </div>
-            </div>
-            <button 
-              onClick={logout}
-              title="Logout"
-              className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-1"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+          {/* Interactive User Profile at Top Right Corner */}
+          <div className="pl-3 border-l border-slate-200">
+            <UserProfileMenu onOpenProfile={() => setIsProfileModalOpen(true)} />
           </div>
         </div>
       </header>
@@ -116,9 +106,16 @@ function MainLayout() {
             <Route path="/news" element={<MarketNews />} />
             <Route path="/strategy/*" element={<StrategyLab />} />
             <Route path="/data-sources" element={<DataSources />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Routes>
         </div>
       </main>
+
+      {/* Profile Modal for Viewing, Changing Name, and Logout */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
     </div>
   );
 }

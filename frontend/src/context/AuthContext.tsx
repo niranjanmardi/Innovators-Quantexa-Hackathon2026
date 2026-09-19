@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export interface User {
   username: string;
@@ -11,31 +11,25 @@ interface AuthContextType {
   token: string | null;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUser: (user: User, token?: string) => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Load from local storage on mount
-    const storedToken = localStorage.getItem('quant_token');
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('quant_token'));
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('quant_user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
+    if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        return JSON.parse(storedUser);
       } catch (e) {
         console.error('Failed to parse user', e);
       }
     }
-    setIsLoading(false);
-  }, []);
+    return null;
+  });
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);
@@ -51,12 +45,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('quant_user');
   };
 
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">Loading...</div>;
-  }
+  const updateUser = (newUser: User, newToken?: string) => {
+    setUser(newUser);
+    localStorage.setItem('quant_user', JSON.stringify(newUser));
+    if (newToken) {
+      setToken(newToken);
+      localStorage.setItem('quant_token', newToken);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated: !!token }}>
       {children}
     </AuthContext.Provider>
   );

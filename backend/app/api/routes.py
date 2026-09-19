@@ -23,7 +23,7 @@ class SignupRequest(BaseModel):
     email: str
     username: str
     password: str
-    avatar_url: str
+    avatar_url: Optional[str] = "https://api.dicebear.com/7.x/shapes/svg?seed=Quant1"
 
 class LoginRequest(BaseModel):
     username: str
@@ -72,6 +72,38 @@ def login(req: LoginRequest):
             "avatar_url": user["avatar_url"]
         }
     }
+
+class UpdateProfileRequest(BaseModel):
+    current_username: str
+    new_username: Optional[str] = None
+    new_avatar_url: Optional[str] = None
+
+@router.put("/auth/profile")
+@router.post("/auth/profile")
+def update_profile(req: UpdateProfileRequest):
+    try:
+        updated_user = auth_service.update_user(
+            current_username=req.current_username,
+            new_username=req.new_username,
+            new_avatar_url=req.new_avatar_url
+        )
+        access_token = auth_service.create_access_token(
+            data={"sub": updated_user["username"]},
+            expires_delta=datetime.timedelta(minutes=auth_service.ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "username": updated_user["username"],
+                "email": updated_user["email"],
+                "avatar_url": updated_user["avatar_url"]
+            }
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 class BacktestRequest(BaseModel):
