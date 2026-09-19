@@ -7,7 +7,7 @@ load_dotenv()
 
 from app.api.routes import router
 
-app = FastAPI(title="Quant Platform API", version="1.0.0")
+app = FastAPI(title="Quant Platform API", version="1.0.1")
 
 # Setup CORS for the frontend (allows local dev and deployed frontend such as Vercel)
 app.add_middleware(
