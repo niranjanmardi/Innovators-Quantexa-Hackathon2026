@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Mail, Lock, User, CheckCircle2, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import { loginApi, signupApi } from '../services/api';
 
 // 10 distinct professional avatar options
 const AVATAR_OPTIONS = Array.from({ length: 10 }, (_, i) => 
@@ -28,11 +28,8 @@ export default function Auth() {
 
     try {
       if (isLogin) {
-        const res = await axios.post('http://localhost:8000/api/auth/login', {
-          username,
-          password
-        });
-        login(res.data.access_token, res.data.user);
+        const data = await loginApi(username, password);
+        login(data.access_token, data.user);
       } else {
         if (password.length < 8) {
           setError('Password must be at least 8 characters long.');
@@ -44,13 +41,13 @@ export default function Auth() {
           setIsLoading(false);
           return;
         }
-        const res = await axios.post('http://localhost:8000/api/auth/signup', {
+        const data = await signupApi({
           email,
           username,
           password,
           avatar_url: selectedAvatar
         });
-        login(res.data.access_token, res.data.user);
+        login(data.access_token, data.user);
       }
     } catch (err: any) {
       const detail = err.response?.data?.detail;
@@ -59,11 +56,12 @@ export default function Auth() {
       } else if (Array.isArray(detail)) {
         setError(detail.map((d: any) => d.msg || d.message || JSON.stringify(d)).join(', '));
       } else if (err.message && !err.response) {
-        setError('Cannot connect to server. Please check that backend is running on port 8000.');
+        setError('Cannot connect to backend server. Please verify backend is running and reachable.');
       } else {
         setError(err.response?.data?.message || 'Authentication failed. Please try again.');
       }
-    } finally {
+    }
+ finally {
       setIsLoading(false);
     }
   };

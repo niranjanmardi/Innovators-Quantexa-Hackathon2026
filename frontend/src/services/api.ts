@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const apiClient = axios.create({
   baseURL: API_URL,
 });
+
 
 
 export const searchAssets = async (q: string) => {
@@ -130,17 +131,33 @@ export interface UpdateProfileResponse {
   };
 }
 
+export const loginApi = async (username: string, password: string) => {
+  const { data } = await apiClient.post('/auth/login', { username, password });
+  return data;
+};
+
+export const signupApi = async (payload: {
+  email: string;
+  username: string;
+  password: string;
+  avatar_url?: string;
+}) => {
+  const { data } = await apiClient.post('/auth/signup', payload);
+  return data;
+};
+
 export const updateProfileApi = async (payload: UpdateProfilePayload): Promise<UpdateProfileResponse> => {
   try {
     const { data } = await apiClient.put<UpdateProfileResponse>('/auth/profile', payload);
     return data;
   } catch (err: any) {
-    // If relative proxy path fails, fallback to direct port 8000
-    if (!err.response && typeof window !== 'undefined') {
+    // If relative proxy path fails in local dev, fallback to direct port 8000
+    if (!err.response && typeof window !== 'undefined' && !import.meta.env.VITE_API_URL) {
       const { data } = await axios.put<UpdateProfileResponse>('http://localhost:8000/api/auth/profile', payload);
       return data;
     }
     throw err;
   }
 };
+
 
