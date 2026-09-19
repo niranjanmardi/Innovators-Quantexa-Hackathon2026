@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LineChart, BarChart2, Newspaper, Shield, Database, GitBranch, Terminal } from 'lucide-react';
+import { LineChart, BarChart2, Newspaper, Shield, Database, GitBranch } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
+
 import AssetAnalysis from './pages/AssetAnalysis';
 import MarketNews from './pages/MarketNews';
 import StrategyLab from './pages/StrategyLab';
@@ -77,23 +78,11 @@ function MainLayout() {
           </nav>
         </div>
 
-        {/* Backend Connection & User Profile */}
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full text-[11px] mr-2">
-            <Terminal className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-slate-600 font-medium">http://localhost:8000</span>
-            <span className="w-px h-3 bg-slate-300 mx-1"></span>
-            <span className="inline-flex items-center gap-1.5 text-emerald-600 font-bold tracking-wide">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              API ONLINE
-            </span>
-          </div>
-
-          {/* Interactive User Profile at Top Right Corner */}
-          <div className="pl-3 border-l border-slate-200">
-            <UserProfileMenu onOpenProfile={() => setIsProfileModalOpen(true)} />
-          </div>
+        {/* Interactive User Profile at Top Right Corner */}
+        <div className="flex items-center">
+          <UserProfileMenu onOpenProfile={() => setIsProfileModalOpen(true)} />
         </div>
+
       </header>
 
       {/* Main Content Area */}

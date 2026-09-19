@@ -57,14 +57,14 @@ export default function UserProfileMenu({ onOpenProfile }: UserProfileMenuProps)
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className={`flex items-center gap-3 pl-2 pr-3 py-1.5 rounded-2xl border transition-all duration-200 select-none group ${
+        className={`flex items-center gap-3 px-3 py-1.5 rounded-full border transition-all duration-200 select-none group cursor-pointer ${
           isOpen
-            ? 'bg-blue-50/80 border-blue-200 shadow-sm ring-2 ring-blue-500/15'
-            : 'bg-white/80 hover:bg-slate-100/80 border-slate-200/80 hover:border-slate-300 shadow-xs'
+            ? 'bg-blue-50/90 border-blue-300 shadow-sm ring-2 ring-blue-500/20'
+            : 'bg-white hover:bg-slate-50 border-slate-200 hover:border-slate-300 shadow-xs'
         }`}
       >
         {/* Avatar with Status Indicator */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <img
             src={user.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${user.username}`}
             alt={user.username}
@@ -76,23 +76,24 @@ export default function UserProfileMenu({ onOpenProfile }: UserProfileMenuProps)
           />
         </div>
 
-        {/* Name and Role Label */}
+        {/* Name and Email Label */}
         <div className="text-left hidden sm:block">
-          <p className="text-xs font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors max-w-[130px] truncate">
+          <p className="text-xs font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors max-w-[160px] truncate">
             {user.username}
           </p>
-          <p className="text-[10px] text-slate-500 font-medium leading-tight max-w-[130px] truncate">
+          <p className="text-[11px] text-slate-500 font-medium leading-tight max-w-[160px] truncate" title={user.email}>
             {user.email}
           </p>
         </div>
 
         {/* Dropdown Chevron */}
         <ChevronDown 
-          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+          className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
             isOpen ? 'rotate-180 text-blue-600' : 'group-hover:text-slate-600'
           }`} 
         />
       </button>
+
 
       {/* Dropdown Card */}
       {isOpen && (
