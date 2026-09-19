@@ -1,0 +1,211 @@
+================================================================================
+           QUANTPLATFORM (RESEARCH OS) - HACKATHON JUDGES PREP GUIDE
+           Innovators - Quantexa Hackathon 2026 | Comprehensive Study Notes
+================================================================================
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & CORE VALUE PROPOSITION
+--------------------------------------------------------------------------------
+Project Name: QuantPlatform (Research OS)
+Domain:       FinTech / Quantitative Finance & Decision Intelligence
+Repository:   https://github.com/niranjanmardi/Innovators-Quantexa-Hackathon2026
+
+The Core Problem:
+- 90% of retail algorithmic backtests appear profitable historically but fail in 
+  live execution due to:
+  1. Overfitting (tuning parameters to historical noise)
+  2. Look-ahead bias (using future information in past decisions)
+  3. Zero-slippage and zero-commission assumptions
+  4. "Black-box" predictions that cannot be explained or audited.
+
+The QuantPlatform Solution:
+- An institutional-grade quantitative research and strategy verification platform.
+- It acts as an algorithmic trust auditor: verifying parameter robustness, 
+  preventing look-ahead leakage, segmenting returns across market regimes, 
+  and stress-testing strategies against historic flash crashes.
+
+Core Design Principles:
+1. Strict Zero-Mock Policy: Only real historical/live market feeds (Yahoo Finance).
+2. Explainability Over Prediction: AI explains actual computed quantitative statistics 
+   (Sharpe, Max Drawdown, Regime Sensitivity)—it does NOT predict future prices.
+3. Realistic Execution: Explicit deduction of commission costs and slippage basis points.
+
+
+--------------------------------------------------------------------------------
+2. TECHNICAL ARCHITECTURE & STACK BREAKDOWN
+--------------------------------------------------------------------------------
+Frontend:
+- Core:        React 19, TypeScript, Vite
+- Styling:     Tailwind CSS (Glassmorphic dark/light institutional UI)
+- Charts:      Recharts (interactive price, returns, drawdown, and heatmaps)
+- Routing:     React Router DOM (SPA rewrite rules via vercel.json)
+- State/Cache: TanStack React Query + React Context API
+- Hosting:     Vercel (Production Cloud CDN)
+
+Backend:
+- Framework:   Python 3.11/3.14, FastAPI, Uvicorn
+- Data Tools:  Pandas, NumPy, SciPy (vectorized time-series calculations)
+- Security:    JWT (HS256) Bearer tokens, salted bcrypt password hashing, CORS regex
+- Database:    SQLite (users.db) for session and authentication storage
+- Providers:   yfinance (OHLCV prices), NewsData.io + Yahoo Finance (live news)
+- Caching:     Multi-tier TTL cache (In-Memory + Redis connection support)
+- Hosting:     Render (Production Cloud Web Service with zero-downtime deploys)
+
+
+--------------------------------------------------------------------------------
+3. FEATURE-BY-FEATURE BREAKDOWN (PAGE BY PAGE)
+--------------------------------------------------------------------------------
+
+[1] DASHBOARD (Route: /)
+- Real-time global market indices and benchmark assets (S&P 500, Nasdaq, BTC, Gold).
+- Daily percentage change, price spreads, and volume tracking.
+- Sidebar streaming live categorized financial news headlines.
+
+[2] ASSET ANALYSIS (Route: /asset)
+- User Input: Asset ticker symbol (e.g., AAPL, NVDA, BTC-USD, GLD) + date range.
+- Technical Overlays:
+  * Simple Moving Averages (20-day, 50-day, 200-day SMA).
+  * Exponential Moving Averages (EMA).
+- Statistical Computations:
+  * Daily Simple Returns.
+  * 30-day Rolling Historical Volatility (annualized on 252-day trading basis).
+  * Asset-specific news feed correlation.
+
+[3] CORRELATION LAB (Route: /correlation)
+- Purpose: Multi-asset diversification and portfolio risk concentration analysis.
+- Logic:
+  1. Synchronizes trading calendars across different asset types (e.g. equities 
+     trade 252 days/yr vs. crypto 365 days/yr) using inner-join timestamp alignment.
+  2. Computes the Pearson Correlation Matrix across all selected assets.
+- Visualization: Interactive color-coded heatmap (-1.0 to +1.0).
+
+[4] STRATEGY LAB (Route: /strategy) - [THE CORE QUANT ENGINE]
+Simulates and benchmarks 4 algorithmic trading strategies:
+1. SMA Crossover: Fast SMA crossing Slow SMA to capture macro trends.
+2. EMA Trend: Exponentially-weighted moving average to reduce reaction lag.
+3. Momentum (RSI / Rate of Change): Long positions on rolling price velocity.
+4. Mean Reversion: Statistical arbitrage buying dips below standard deviation bands 
+   and exiting upon return to the mean.
+
+Key Backtest Capabilities:
+- Benchmark Comparison: Direct comparison against Buy & Hold on identical timeframe.
+- Friction Modeling: Realistic trade commissions ($/trade) and slippage (basis points).
+- Detailed Metrics: Total Return, Annualized Return, Sharpe Ratio, Max Drawdown, 
+  Win/Loss Ratio, Profit Factor, Largest Losing Streak.
+
+[5] TRUST ENGINE & INTEGRITY LAYER
+- Parameter Sensitivity Check: Perturbs hyperparameters by +/- 10% to +/- 20%. 
+  If a strategy collapses upon small parameter changes, it is flagged as FRAGILE/OVERFIT.
+- Look-Ahead Bias Prevention: Signals computed at bar t close strictly execute at 
+  bar t+1 open.
+- Turnover Sanity Check: Measures trading frequency to ensure transaction costs 
+  do not consume total profits.
+- Algorithmic Trust Score (0 to 100): Composite score grading real-world viability.
+
+[6] REGIME ENGINE & STRESS-TEST LAB
+- Regime Classification: Partitions historical backtest periods into 4 economic regimes:
+  1. Bull Market (Upward trend + Low Volatility)
+  2. Bear Market (Downward trend + High Volatility)
+  3. Choppy / Sideways (Low trend + Range-bound)
+  4. Crisis Shock (High Volatility Spikes)
+- Stress-Test Scenarios: Simulates historic black swan events (March 2020 Flash Crash, 
+  2022 Tech Sell-Off, 3x Slippage Spikes) to test survival.
+
+[7] MARKET NEWS INTELLIGENCE (Route: /news)
+- Dual-Provider Live Architecture:
+  * Primary: NewsData.io API (rate-limited, credit budget tracking).
+  * Secondary Fallback: Real-time Yahoo Finance news stream (no API key required).
+- Features: Article deduplication, HTTPS link validation, image extraction, 
+  category filtering (Tech, Business, Crypto, Macro).
+
+
+--------------------------------------------------------------------------------
+4. MATHEMATICAL FORMULAS (CHEAT SHEET TO MEMORIZE)
+--------------------------------------------------------------------------------
+
+1. Daily Simple Return:
+   R_t = (P_t - P_{t-1}) / P_{t-1}
+
+2. Cumulative Return:
+   CumRet_t = Product_{i=1}^t (1 + R_i) - 1
+
+3. Annualized Historical Volatility:
+   sigma_daily = sqrt( (1 / (N - 1)) * Sum_{t=1}^N (R_t - Mean_R)^2 )
+   sigma_annual = sigma_daily * sqrt(252)   [Note: Uses sqrt(365) for Crypto]
+
+4. Annualized Sharpe Ratio:
+   Sharpe = ( (Mean_R - R_f) / sigma_excess ) * sqrt(252)
+   (Where R_f is the risk-free rate, defaulted to 0.0 for conservative baseline)
+
+5. Running Peak & Drawdown Series:
+   Peak_t = Max_{i <= t} (Portfolio_Value_i)
+   DD_t   = (Portfolio_Value_t - Peak_t) / Peak_t
+   Max Drawdown (MDD) = Min_t (DD_t)
+
+6. Pearson Correlation Coefficient:
+   rho_{X,Y} = Sum( (X_i - Mean_X) * (Y_i - Mean_Y) ) /
+               sqrt( Sum(X_i - Mean_X)^2 * Sum(Y_i - Mean_Y)^2 )
+
+
+--------------------------------------------------------------------------------
+5. FREQUENTLY ASKED QUESTIONS BY JUDGES & WINNING ANSWERS
+--------------------------------------------------------------------------------
+
+Q1: "Does your AI predict stock prices?"
+A1: "No. In professional quantitative finance, using generative LLMs to predict 
+    future prices is statistically invalid and prone to hallucination. Our AI 
+    layer acts strictly as a Quantitative Analyst and Explainer: it ingests real 
+    computed statistics (Sharpe, Drawdown, Regime breakdowns) and translates 
+    complex quantitative telemetry into actionable, auditable risk reports."
+
+Q2: "How do you protect against look-ahead bias in backtests?"
+A2: "In our BacktestEngine, signals generated at the close of time t are strictly 
+    executed at the opening price of time t+1. We also run automated timestamp 
+    assertions to ensure future data cannot contaminate historical state."
+
+Q3: "How does your platform prevent overfitting?"
+A3: "Through our TrustEngine. We run automated parameter sensitivity sweeps (+/- 10% 
+    to +/- 20%). If a strategy is only profitable at an exact 20-day parameter and 
+    crashes at 18 or 22 days, our TrustEngine flags it as overfitted and reduces 
+    its Trust Score."
+
+Q4: "How do you handle different trading calendars in the Correlation Lab?"
+A4: "Equities trade approximately 252 days per year during market hours, whereas 
+    cryptocurrencies trade 24/7 across 365 days. Our QuantEngine performs an 
+    inner-join timestamp alignment on daily closing prices so correlations are 
+    calculated strictly on concurrent dates."
+
+Q5: "How does your architecture handle rate limits and outages in production?"
+A5: "We built a resilient multi-tier caching service (In-Memory + Redis support) 
+    with a daily credit budget manager. For instance, our News Intelligence engine 
+    automatically falls back to Yahoo Finance streaming if NewsData.io quotas 
+    are reached, ensuring zero downtime and zero blank screens."
+
+Q6: "Why is this solution relevant to Quantexa?"
+A6: "Quantexa's core mission is Decision Intelligence: replacing black-box 
+    ambiguity with transparent, connected, and trusted data. QuantPlatform applies 
+    that exact principle to algorithmic finance by turning opaque backtests into 
+    auditable, explainable, and stress-tested decision systems."
+
+
+--------------------------------------------------------------------------------
+6. 3-MINUTE LIVE DEMO WALKTHROUGH ORDER
+--------------------------------------------------------------------------------
+1. Dashboard (/): 
+   Show live indices (SPY, QQQ, BTC) and explain the zero-mock data policy.
+2. Asset Analysis (/asset): 
+   Search NVDA or AAPL. Show technical overlays and rolling 30-day volatility.
+3. Correlation Lab (/correlation): 
+   Highlight cross-asset Pearson correlation matrix (Crypto vs. Tech vs. Gold).
+4. Strategy Lab (/strategy): 
+   Run an EMA Trend or Momentum backtest on BTC-USD.
+   - Point out the Buy & Hold benchmark equity curve comparison.
+   - Show the TrustEngine Score and sensitivity validation.
+   - Point out the RegimeEngine breakdown (Bull vs. Bear performance).
+   - Show the AI Strategy Autopsy report.
+5. Market News (/news): 
+   Show real-time categorized financial news stream correlated with asset volatility.
+
+================================================================================
+                               END OF GUIDE
+================================================================================
