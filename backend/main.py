@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(router) # Fallback without prefix to prevent 404 if /api is omitted
 
 @app.get("/")
 def root():
